@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHRI SIDDHACHAL AUTO PARTS - Billing</title>
+    
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Stable QR Code Library CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: "Plus Jakarta Sans", sans-serif;
+            background: linear-gradient(135deg, #09090b 0%, #111115 100%);
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom hide spin buttons for clean numeric display */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Glowing effects for active states */
+        .glow-border:focus-within {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-zinc-100 flex flex-col items-center justify-between p-4 md:p-8 overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="w-full max-w-lg text-center mt-2 mb-6">
+        <div class="inline-flex items-center gap-2 bg-zinc-900/80 border border-zinc-800 px-4 py-2 rounded-full mb-3 shadow-lg backdrop-blur">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Merchant Terminal Connected</p>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-zinc-200 to-zinc-400">
+            SHRI SIDDHACHAL AUTO PARTS
+        </h1>
+        <p class="text-sm text-zinc-500 mt-1 font-mono tracking-wide">VPA: pranay.jain95@axl</p>
+    </header>
+
+    <!-- Main Interactive Area -->
+    <main class="w-full max-w-lg flex-grow flex flex-col justify-center">
+        <!-- Billing Terminal Card -->
+        <div class="bg-zinc-950/60 border border-zinc-900 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md">
+            
+            <form id="payment-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                
+                <!-- Large Price Input Area -->
+                <div>
+                    <label for="amount" class="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">
+                        Enter Bill Amount
+                    </label>
+                    <div class="relative flex items-center bg-zinc-900/50 border border-zinc-800 rounded-2xl glow-border transition-all duration-300">
+                        <span class="absolute left-6 text-3xl md:text-4xl font-extrabold text-zinc-600 select-none">₹</span>
+                        <input 
+                            type="number" 
+                            id="amount" 
+                            placeholder="0.00" 
+                            step="any" 
+                            min="0.01" 
+                            inputmode="decimal" 
+                            autofocus
+                            required
+                            class="w-full bg-transparent pl-16 pr-6 py-6 text-4xl md:text-5xl font-extrabold text-white outline-none rounded-2xl font-mono tracking-tight placeholder-zinc-800"
+                            oninput="handleAmountInput(this.value)"
+                        >
+                    </div>
+                    <!-- Formatted Spelled-Out Subtitle -->
+                    <div id="formatted-preview" class="text-right text-xs text-zinc-500 font-medium font-mono mt-1.5 min-h-[1rem]">
+                        ₹ 0.00
+                    </div>
+                </div>
+
+                <!-- Quick Addition presets for speed -->
+                <div class="grid grid-cols-4 gap-2">
+                    <button type="button" onclick="addAmount(100)" class="py-3 px-2 bg-zinc-900/30 border border-zinc-800/60 hover:border-zinc-700 hover:bg-zinc-900 rounded-xl text-sm font-semibold text-zinc-300 transition-all active:scale-95">+100</button>
+                    <button type="button" onclick="addAmount(500)" class="py-3 px-2 bg-zinc-900/30 border border-zinc-800/60 hover:border-zinc-700 hover:bg-zinc-900 rounded-xl text-sm font-semibold text-zinc-300 transition-all active:scale-95">+500</button>
+                    <button type="button" onclick="addAmount(1000)" class="py-3 px-2 bg-zinc-900/30 border border-zinc-800/60 hover:border-zinc-700 hover:bg-zinc-900 rounded-xl text-sm font-semibold text-zinc-300 transition-all active:scale-95">+1000</button>
+                    <button type="button" onclick="clearAmount()" class="py-3 px-2 bg-zinc-900/30 border border-zinc-800/60 hover:border-red-950 hover:bg-red-950/20 rounded-xl text-sm font-semibold text-red-400 transition-all active:scale-95">Clear</button>
+                </div>
+
+                <!-- Action Buttons -->
+                <button 
+                    type="submit" 
+                    class="w-full py-4 bg-white hover:bg-zinc-200 text-black font-extrabold text-lg rounded-2xl transition-all duration-200 shadow-lg shadow-white/5 active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                    <span>Generate QR Code</span>
+                    <span class="text-xs bg-zinc-200 text-zinc-600 px-2 py-0.5 rounded font-mono hidden md:inline">⏎ Enter</span>
+                </button>
+            </form>
+
+            <!-- QR Display & Download Zone -->
+            <div id="qr-display-zone" class="hidden mt-8 pt-8 border-t border-zinc-900 flex-col items-center justify-center space-y-4 animate-[fadeIn_0.3s_ease-out]">
+                
+                <div class="relative group bg-white p-4 rounded-2xl shadow-inner border border-zinc-200/20 max-w-[260px] mx-auto cursor-zoom-in transition-all duration-300 hover:scale-[1.02] hover:shadow-white/5 active:scale-95" onclick="openFullscreenQR()" title="Click to enlarge">
+                    <!-- The generated QR code mounts inside this target -->
+                    <div id="qrcode" class="overflow-hidden"></div>
+                    
+                    <!-- Hover/Tap Overlay Hint -->
+                    <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
+                        <span class="bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded-md font-mono tracking-wider flex items-center gap-1.5 shadow-lg">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path></svg>
+                            TAP TO ENLARGE
+                        </span>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <p class="text-[10px] text-zinc-500 font-medium tracking-wide">💡 Tap QR code to show full-screen to customers</p>
+                    <p class="text-xs text-zinc-500 font-mono mt-2" id="upi-link-preview"></p>
+                </div>
+
+                <div class="flex gap-2 w-full">
+                    <button 
+                        type="button" 
+                        onclick="saveQR()" 
+                        class="flex-1 py-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Save QR Code
+                    </button>
+                    <button 
+                        type="button" 
+                        onclick="copyLink()" 
+                        class="py-3 px-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95"
+                        title="Copy payment link"
+                    >
+                        <svg id="copy-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-5 10v2m8-6v6m-4-10v10"></path></svg>
+                        Copy Link
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Helper Footer and Keyboard Guides -->
+    <footer class="w-full max-w-lg text-center mt-6 text-xs text-zinc-600 space-y-2">
+        <p class="hidden md:block">
+            <kbd class="px-1.5 py-0.5 bg-zinc-900 border border-zinc-800 rounded font-mono text-[10px] text-zinc-400">Esc</kbd> to clear amount.
+            <kbd class="px-1.5 py-0.5 bg-zinc-900 border border-zinc-800 rounded font-mono text-[10px] text-zinc-400">Enter</kbd> to generate.
+        </p>
+        <p>© 2026 SHRI SIDDHACHAL AUTO PARTS. Secure UPI Terminal.</p>
+    </footer>
+
+    <!-- Fullscreen Overlay Modal -->
+    <div id="qr-fullscreen-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-4 cursor-pointer transition-all duration-300 animate-[fadeIn_0.2s_ease-out]" onclick="closeFullscreenQR()">
+        <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-[90vw] max-h-[85vh] flex flex-col items-center justify-center transition-transform duration-300 hover:scale-[1.01]" onclick="event.stopPropagation()">
+            <div id="fullscreen-qrcode" class="overflow-hidden"></div>
+        </div>
+        <p class="text-zinc-400 text-xs font-semibold mt-4 font-mono tracking-widest animate-pulse uppercase">Tap anywhere to return</p>
+    </div>
+
+    <script>
+        // Constants for Merchants
+        const UPI_ID = "pranay.jain95@axl";
+        const PAYEE_NAME = "SHRI%20SIDDHACHAL%20AUTO%20PARTS";
+        
+        let currentAmount = "";
+        let qrGeneratorInstance = null;
+        let activeUPILink = "";
+
+        // Elements
+        const amountInput = document.getElementById('amount');
+        const formattedPreview = document.getElementById('formatted-preview');
+        const qrDisplayZone = document.getElementById('qr-display-zone');
+        const qrCodeTarget = document.getElementById('qrcode');
+        const upiLinkPreview = document.getElementById('upi-link-preview');
+
+        // Always keep input focused on page click for fast laptop workflow
+        document.addEventListener('click', (e) => {
+            // Only refocus if the user isn't clicking on other buttons/inputs
+            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'A' && !e.target.closest('#qr-fullscreen-modal')) {
+                amountInput.focus();
+            }
+        });
+
+        // Focus on mount
+        window.onload = function() {
+            amountInput.focus();
+        };
+
+        // Keyboard Shortcuts (Esc to clear / escape fullscreen modal, Enter to generate)
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const fsModal = document.getElementById('qr-fullscreen-modal');
+                if (fsModal && !fsModal.classList.contains('hidden')) {
+                    closeFullscreenQR();
+                } else {
+                    clearAmount();
+                }
+                event.preventDefault();
+            }
+        });
+
+        // Real-time dynamic updates as the merchant types
+        function handleAmountInput(val) {
+            currentAmount = val;
+            updatePreview(val);
+            
+            // Generate instantly if typing a valid amount (Real-time laptop generation)
+            if (val && parseFloat(val) > 0) {
+                renderQR(val, false); // silent dynamic render
+            } else {
+                hideQR();
+            }
+        }
+
+        // Add to amount (Preset quick additions)
+        function addAmount(valueToAdd) {
+            let current = parseFloat(amountInput.value) || 0;
+            let finalAmount = (current + valueToAdd).toFixed(2);
+            amountInput.value = finalAmount;
+            handleAmountInput(finalAmount);
+            amountInput.focus();
+        }
+
+        // Clear display completely
+        function clearAmount() {
+            amountInput.value = "";
+            currentAmount = "";
+            formattedPreview.textContent = "₹ 0.00";
+            hideQR();
+            amountInput.focus();
+        }
+
+        // Update the subtitled display preview
+        function updatePreview(val) {
+            if (!val) {
+                formattedPreview.textContent = "₹ 0.00";
+                return;
+            }
+            const parsed = parseFloat(val);
+            if (isNaN(parsed)) {
+                formattedPreview.textContent = "₹ 0.00";
+            } else {
+                formattedPreview.textContent = `₹ ${parsed.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
+        }
+
+        // Form Submit Handler (Keyboard 'Enter' or Action Button)
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const val = amountInput.value.trim();
+            if (!val || parseFloat(val) <= 0) {
+                return;
+            }
+            renderQR(val, true); // Active render, scroll into view if on mobile
+            amountInput.blur(); // Hide virtual keyboards on mobile upon confirm
+        }
+
+        // Render QR engine wrapper
+        function renderQR(val, shouldScroll) {
+            const formattedVal = parseFloat(val).toFixed(2);
+            activeUPILink = `upi://pay?pa=${UPI_ID}&pn=${PAYEE_NAME}&am=${formattedVal}&cu=INR`;
+            
+            // Clean older dynamic mounts
+            qrCodeTarget.innerHTML = "";
+            qrDisplayZone.classList.remove('hidden');
+            qrDisplayZone.classList.add('flex');
+            upiLinkPreview.textContent = `Payable Amount: ₹${formattedVal}`;
+
+            // Build High Quality scannable QR
+            new QRCode(qrCodeTarget, {
+                text: activeUPILink,
+                width: 230,
+                height: 230,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            if (shouldScroll) {
+                setTimeout(() => {
+                    qrDisplayZone.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+        }
+
+        function hideQR() {
+            qrDisplayZone.classList.add('hidden');
+            qrDisplayZone.classList.remove('flex');
+            activeUPILink = "";
+        }
+
+        // Download / Save QR code safely on laptop or mobile
+        function saveQR() {
+            const img = document.querySelector('#qrcode img');
+            if (img && img.src) {
+                const link = document.createElement('a');
+                link.href = img.src;
+                link.download = `Siddhachal_Auto_Parts_${parseFloat(amountInput.value || 0).toFixed(2)}.png`;
+                link.click();
+            } else {
+                const canvas = document.querySelector('#qrcode canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL("image/png");
+                    link.download = `Siddhachal_Auto_Parts_${parseFloat(amountInput.value || 0).toFixed(2)}.png`;
+                    link.click();
+                }
+            }
+        }
+
+        // Clipboard Copy Utility using legacy safe executive command for iframe compliance
+        function copyLink() {
+            if (!activeUPILink) return;
+            
+            const dummyInput = document.createElement('input');
+            dummyInput.value = activeUPILink;
+            document.body.appendChild(dummyInput);
+            dummyInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummyInput);
+
+            // Quick visual feedback on success
+            const copyIcon = document.getElementById('copy-icon');
+            const originalPath = copyIcon.innerHTML;
+            copyIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>`;
+            setTimeout(() => {
+                copyIcon.innerHTML = originalPath;
+            }, 1800);
+        }
+
+        // Responsive Fullscreen overlay generator
+        function openFullscreenQR() {
+            if (!activeUPILink) return;
+
+            const modal = document.getElementById('qr-fullscreen-modal');
+            const fsTarget = document.getElementById('fullscreen-qrcode');
+
+            fsTarget.innerHTML = "";
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // Responsive size check to make the QR as massive as possible while ensuring scan margin
+            const sizeLimit = Math.min(window.innerWidth * 0.85, window.innerHeight * 0.65, 380);
+
+            new QRCode(fsTarget, {
+                text: activeUPILink,
+                width: Math.floor(sizeLimit),
+                height: Math.floor(sizeLimit),
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function closeFullscreenQR() {
+            const modal = document.getElementById('qr-fullscreen-modal');
+            const fsTarget = document.getElementById('fullscreen-qrcode');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            if (fsTarget) {
+                fsTarget.innerHTML = "";
+            }
+            // Retain cashier focus on original text terminal
+            amountInput.focus();
+        }
+    </script>
+</body>
+</html>
