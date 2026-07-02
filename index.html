@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHRI SIDDHACHAL AUTO PARTS - Billing</title>
+    <title>Shri Siddhachal Auto Parts - Billing</title>
     <!-- Stable QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
@@ -298,7 +298,7 @@
 
 <div class="billing-container">
     <div class="header">
-        <h1>Siddhachal Auto Parts</h1>
+        <h1>Shri Siddhachal Auto Parts</h1>
         <div class="vpa-badge">pranay.jain95@axl</div>
     </div>
 
@@ -347,7 +347,7 @@
 <!-- IMMERSIVE FULLSCREEN OVERLAY -->
 <div id="fullscreen-overlay" onclick="closeFullscreen()">
     <div class="fullscreen-content" onclick="event.stopPropagation()">
-        <div class="fullscreen-title">SHRI SIDDHACHAL AUTO PARTS</div>
+        <div class="fullscreen-title">Shri Siddhachal Auto Parts</div>
         <div class="fullscreen-subtitle" id="fullscreen-amount">Amount: ₹0.00</div>
         
         <!-- Target container for high resolution fullscreen QR -->
@@ -527,11 +527,11 @@
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // 3. Draw Header Title ("SHRI SIDDHACHAL AUTO PARTS")
+        // 3. Draw Header Title ("Shri Siddhachal Auto Parts")
         ctx.textAlign = "center";
         ctx.fillStyle = "#000000";
         ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif';
-        ctx.fillText("SHRI SIDDHACHAL AUTO PARTS", 210, 65);
+        ctx.fillText("Shri Siddhachal Auto Parts", 210, 65);
 
         // 4. Draw Subheader Amount ("Amount: ₹[activeAmount]" or "Amount: Flexible")
         ctx.fillStyle = "#71717a";
@@ -594,10 +594,10 @@
                     if (navigator.canShare({ files: [file] })) {
                         await navigator.share({
                             files: [file],
-                            title: 'SHRI SIDDHACHAL AUTO PARTS',
+                            title: 'Shri Siddhachal Auto Parts',
                             text: parseFloat(activeAmount) > 0 
-                                ? `UPI payment invoice of ₹${activeAmount} generated dynamically.`
-                                : 'Flexible UPI payment QR generated dynamically.'
+                                ? `Pay ₹${activeAmount} to Shri Siddhachal Auto Parts`
+                                : 'Pay to Shri Siddhachal Auto Parts'
                         });
                     } else {
                         // Fallback: Try sharing payment link if files are blocked
@@ -607,10 +607,10 @@
                         }
                         upiUri += `&cu=INR`;
                         await navigator.share({
-                            title: 'SHRI SIDDHACHAL AUTO PARTS',
+                            title: 'Shri Siddhachal Auto Parts',
                             text: parseFloat(activeAmount) > 0 
-                                ? `Pay ₹${activeAmount} using this link: ${upiUri}`
-                                : `Pay using this link: ${upiUri}`
+                                ? `Pay ₹${activeAmount} to Shri Siddhachal Auto Parts`
+                                : 'Pay to Shri Siddhachal Auto Parts'
                         });
                     }
                 }, 'image/png');
