@@ -412,19 +412,32 @@
         const displayZone = document.getElementById('display-zone');
         const qrcodeDiv = document.getElementById('qrcode');
 
-        if (!amtInput || parseFloat(amtInput) <= 0) {
-            showToast('Please enter an amount greater than 0.');
+        // Rule 1: If completely empty, trigger an error
+        if (amtInput === "") {
+            showToast('Please enter an amount.');
             return;
         }
 
-        activeAmount = parseFloat(amtInput).toFixed(2);
+        const parsedAmt = parseFloat(amtInput);
+        if (isNaN(parsedAmt) || parsedAmt < 0) {
+            showToast('Please enter a valid amount.');
+            return;
+        }
+
+        // Rule 2: Specifically typing "0" bypasses empty check and creates a flexible amount QR
+        const isFlexible = parsedAmt === 0;
+        activeAmount = isFlexible ? "0.00" : parsedAmt.toFixed(2);
         
         // Clear previous container contents
         qrcodeDiv.innerHTML = "";
         displayZone.style.display = "flex";
 
         // Build official URI protocol deep link
-        const upiUri = `upi://pay?pa=${UPI_TARGET}&pn=${PAYEE_NAME}&am=${activeAmount}&cu=INR`;
+        let upiUri = `upi://pay?pa=${UPI_TARGET}&pn=${PAYEE_NAME}`;
+        if (!isFlexible) {
+            upiUri += `&am=${activeAmount}`;
+        }
+        upiUri += `&cu=INR`;
 
         // Generate the standard preview QR
         new QRCode(qrcodeDiv, {
@@ -446,10 +459,14 @@
         const fsAmountLabel = document.getElementById('fullscreen-amount');
 
         overlay.style.display = "flex";
-        fsAmountLabel.textContent = `Amount: ₹${activeAmount}`;
+        fsAmountLabel.textContent = parseFloat(activeAmount) > 0 ? `Amount: ₹${activeAmount}` : "Amount: Flexible";
         fsQrDiv.innerHTML = "";
 
-        const upiUri = `upi://pay?pa=${UPI_TARGET}&pn=${PAYEE_NAME}&am=${activeAmount}&cu=INR`;
+        let upiUri = `upi://pay?pa=${UPI_TARGET}&pn=${PAYEE_NAME}`;
+        if (parseFloat(activeAmount) > 0) {
+            upiUri += `&am=${activeAmount}`;
+        }
+        upiUri += `&cu=INR`;
 
         // Calculate maximum safe sizing for viewport
         const sideSize = Math.min(window.innerWidth * 0.7, window.innerHeight * 0.5, 360);
@@ -516,10 +533,11 @@
         ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif';
         ctx.fillText("SHRI SIDDHACHAL AUTO PARTS", 210, 65);
 
-        // 4. Draw Subheader Amount ("Amount: ₹[activeAmount]")
+        // 4. Draw Subheader Amount ("Amount: ₹[activeAmount]" or "Amount: Flexible")
         ctx.fillStyle = "#71717a";
         ctx.font = '500 14px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif';
-        ctx.fillText(`Amount: ₹${activeAmount}`, 210, 100);
+        const amtText = parseFloat(activeAmount) > 0 ? `Amount: ₹${activeAmount}` : "Amount: Flexible";
+        ctx.fillText(amtText, 210, 100);
 
         // 5. Centered draw original QR canvas block (260x260 pixels)
         const qrSize = 260;
@@ -527,7 +545,7 @@
         const qrY = 135;
         ctx.drawImage(originalCanvas, qrX, qrY, qrSize, qrSize);
 
-        // 6. Draw Footer Text ("Scan and Pay") exactly like image_617903.png
+        // 6. Draw Footer Text ("Scan and Pay")
         ctx.fillStyle = "#a1a1aa";
         ctx.font = '400 12px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif';
         ctx.fillText("Scan and Pay", 210, 450);
@@ -546,7 +564,7 @@
         try {
             const hook = document.createElement('a');
             hook.href = paddedCanvas.toDataURL("image/png");
-            hook.download = `Shri_Siddhachal_Auto_Parts_${activeAmount}.png`;
+            hook.download = parseFloat(activeAmount) > 0 ? `Siddhachal_AutoParts_${activeAmount}.png` : "Siddhachal_AutoParts_Flexible.png";
             hook.click();
         } catch (e) {
             showToast("Failed to save image. Try taking a screenshot.");
@@ -570,21 +588,29 @@
                         return;
                     }
 
-                    const fileName = `Siddhachal_AutoParts_${activeAmount}.png`;
+                    const fileName = parseFloat(activeAmount) > 0 ? `Siddhachal_AutoParts_${activeAmount}.png` : "Siddhachal_AutoParts_Flexible.png";
                     const file = new File([blob], fileName, { type: 'image/png' });
 
                     if (navigator.canShare({ files: [file] })) {
                         await navigator.share({
                             files: [file],
                             title: 'SHRI SIDDHACHAL AUTO PARTS',
-                            text: `UPI payment invoice of ₹${activeAmount} generated dynamically.`
+                            text: parseFloat(activeAmount) > 0 
+                                ? `UPI payment invoice of ₹${activeAmount} generated dynamically.`
+                                : 'Flexible UPI payment QR generated dynamically.'
                         });
                     } else {
                         // Fallback: Try sharing payment link if files are blocked
-                        const upiUri = `upi://pay?pa=${UPI_TARGET}&pn=${PAYEE_NAME}&am=${activeAmount}&cu=INR`;
+                        let upiUri = `upi://pay?pa=${UPI_TARGET}&pn=${PAYEE_NAME}`;
+                        if (parseFloat(activeAmount) > 0) {
+                            upiUri += `&am=${activeAmount}`;
+                        }
+                        upiUri += `&cu=INR`;
                         await navigator.share({
                             title: 'SHRI SIDDHACHAL AUTO PARTS',
-                            text: `Pay ₹${activeAmount} using this link: ${upiUri}`
+                            text: parseFloat(activeAmount) > 0 
+                                ? `Pay ₹${activeAmount} using this link: ${upiUri}`
+                                : `Pay using this link: ${upiUri}`
                         });
                     }
                 }, 'image/png');
