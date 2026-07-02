@@ -149,7 +149,6 @@
             transform: scale(0.98);
         }
 
-        /* Real-Time Display Frame */
         #display-zone {
             margin-top: 24px;
             display: none;
@@ -470,28 +469,73 @@
         document.getElementById('fullscreen-overlay').style.display = "none";
     }
 
-    // Helper to generate the canvas including the quiet margin padding (used by save and share)
+    // Helper to generate the exact card design requested in image_617903.png
     function generatePaddedCanvas() {
         const originalCanvas = document.querySelector('#qrcode canvas');
         if (!originalCanvas) return null;
 
-        const margin = 25; 
-        const canvasWithBorder = document.createElement('canvas');
-        const ctx = canvasWithBorder.getContext('2d');
+        // Perfect card layout proportions (aspect ratio matching image_617903.png)
+        const canvasWidth = 420;
+        const canvasHeight = 520;
+        const cardRadius = 24;
 
-        canvasWithBorder.width = originalCanvas.width + (margin * 2);
-        canvasWithBorder.height = originalCanvas.height + (margin * 2);
+        const customCanvas = document.createElement('canvas');
+        const ctx = customCanvas.getContext('2d');
 
-        // Fill background with clean pure white
+        customCanvas.width = canvasWidth;
+        customCanvas.height = canvasHeight;
+
+        // 1. Fill base backdrop with dark grey matching standard container boundaries
         ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvasWithBorder.width, canvasWithBorder.height);
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-        // Draw original QR centered inside the padding area
-        ctx.drawImage(originalCanvas, margin, margin);
-        return canvasWithBorder;
+        // 2. Draw the rounded white card container
+        ctx.beginPath();
+        ctx.moveTo(10 + cardRadius, 10);
+        ctx.lineTo(10 + 400 - cardRadius, 10);
+        ctx.quadraticCurveTo(10 + 400, 10, 10 + 400, 10 + cardRadius);
+        ctx.lineTo(10 + 400, 10 + 500 - cardRadius);
+        ctx.quadraticCurveTo(10 + 400, 10 + 500, 10 + 400 - cardRadius, 10 + 500);
+        ctx.lineTo(10 + cardRadius, 10 + 500);
+        ctx.quadraticCurveTo(10, 10 + 500, 10, 10 + 500 - cardRadius);
+        ctx.lineTo(10, 10 + cardRadius);
+        ctx.quadraticCurveTo(10, 10, 10 + cardRadius, 10);
+        ctx.closePath();
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+
+        // Optional: Draw a subtle, neat border line around the card to preserve visibility on pure white backgrounds
+        ctx.strokeStyle = "#e5e5ea";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 3. Draw Header Title ("SHRI SIDDHACHAL AUTO PARTS")
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#000000";
+        ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif';
+        ctx.fillText("SHRI SIDDHACHAL AUTO PARTS", 210, 65);
+
+        // 4. Draw Subheader Amount ("Amount: ₹[activeAmount]")
+        ctx.fillStyle = "#71717a";
+        ctx.font = '500 14px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif';
+        ctx.fillText(`Amount: ₹${activeAmount}`, 210, 100);
+
+        // 5. Centered draw original QR canvas block (260x260 pixels)
+        const qrSize = 260;
+        const qrX = (canvasWidth - qrSize) / 2; // 80
+        const qrY = 135;
+        ctx.drawImage(originalCanvas, qrX, qrY, qrSize, qrSize);
+
+        // 6. Draw Footer Text ("Tap anywhere to return") exactly like image_617903.png
+        ctx.fillStyle = "#a1a1aa";
+        ctx.font = '400 12px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif';
+        ctx.fillText("Tap anywhere to return", 210, 450);
+
+        return customCanvas;
     }
 
-    // Save with padded quiet zone
+    // Save with the exact compiled template card design
     function saveWithPadding() {
         const paddedCanvas = generatePaddedCanvas();
         if (!paddedCanvas) {
@@ -509,7 +553,7 @@
         }
     }
 
-    // Direct system sharing (no manual storage required)
+    // Direct system sharing with identical card template layout
     function shareQRDirectly() {
         const paddedCanvas = generatePaddedCanvas();
         if (!paddedCanvas) {
@@ -533,7 +577,7 @@
                         await navigator.share({
                             files: [file],
                             title: 'SHRI SIDDHACHAL AUTO PARTS',
-                            text: `Scan QR to make UPI payment of ₹${activeAmount}`
+                            text: `UPI payment invoice of ₹${activeAmount} generated dynamically.`
                         });
                     } else {
                         // Fallback: Try sharing payment link if files are blocked
