@@ -99,7 +99,7 @@
             user-select: none;
         }
 
-        input[type="number"] {
+        input[type="text"] {
             width: 100%;
             padding: 18px 20px 18px 55px;
             background: #121212;
@@ -121,7 +121,7 @@
             margin: 0;
         }
 
-        input[type="number"]:focus {
+        input[type="text"]:focus {
             border-color: #ffffff;
             background: #181818;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
@@ -310,10 +310,9 @@
         <div class="input-wrapper">
             <span class="currency-symbol">₹</span>
             <input 
-                type="number" 
+                type="text" 
                 id="billAmount" 
                 placeholder="0.00" 
-                step="any" 
                 inputmode="decimal" 
                 autofocus
             >
@@ -369,12 +368,33 @@
     window.addEventListener('DOMContentLoaded', () => {
         const inputField = document.getElementById('billAmount');
         inputField.focus();
+
+        inputField.addEventListener('input', () => {
+            inputField.value = formatAmountInput(inputField.value);
+        });
         
         // Auto-select text on click to make over-typing super fast
         inputField.addEventListener('click', () => {
             inputField.select();
         });
     });
+
+    function formatAmountInput(value) {
+        let cleaned = value.replace(/[^\d.]/g, "");
+        const firstDotIndex = cleaned.indexOf(".");
+
+        if (firstDotIndex !== -1) {
+            const beforeDecimal = cleaned.slice(0, firstDotIndex);
+            const afterDecimal = cleaned
+                .slice(firstDotIndex + 1)
+                .replace(/\./g, "")
+                .slice(0, 2);
+
+            cleaned = `${beforeDecimal}.${afterDecimal}`;
+        }
+
+        return cleaned;
+    }
 
     // Handle globally pressed Escape key to clear or close fullscreen
     document.addEventListener('keydown', (e) => {
